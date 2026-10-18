@@ -1,5 +1,9 @@
-# Public candidate connections update
+# Revenue hypothesis test — free website/API audit
+Drop-in update: upload **audit.js**, **worker.js**, and **audit.test.js** to the existing GitHub repository root. Preserve server.js and package.json.
 
-Replace only `worker.js` in `malharmn/A2A-Marketing` with this version and commit. Render is configured to deploy the main branch. This adds `GET /candidates?q=api`, a zero-cost list of three independently listed candidate service agents based on public A2A Registry pages. It does not claim partnerships, verify endpoint availability, accept payments, or sell public URLs. Existing `/negotiate` remains nonbinding.
+The existing Render service is connected to the main branch. Once deployed, visit:
+`https://a2a-negotiation-probe.onrender.com/audit?url=https%3A%2F%2Fexample.com`
 
-Do not charge for these public listings; they are a preliminary supply discovery step, not a commercial introduction.
+This version **does not take payments**. It proves that a public user/agent can receive a useful structured report with no metered AI spend. The endpoint uses HTTPS HEAD only, DNS public-address checks, pinned IPv4 lookup, no redirects, 5-second timeout, and reports header-based signals only.
+
+**Commercial gate:** track qualified third-party requests to `/audit`, obtain a real willingness-to-pay signal, configure a user-controlled receiving wallet through a validated x402 payment flow, then register a genuinely paid endpoint. No test request counts as earnings. Avoid using it as a vulnerability scanner.

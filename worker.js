@@ -1,3 +1,4 @@
+import { audit } from './audit.js';
 /** Public buyer/seller discovery and nonbinding negotiation; no payment collection. */
 const FLOOR = 0.001;
 // Registry-listed public candidates. NOT partnered sellers, validated availability, or paid inventory.
@@ -11,6 +12,12 @@ const response = (data,status=200) => new Response(JSON.stringify(data),{status,
 export default {async fetch(request) {
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') return new Response(null,{headers:{...headers,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type'}});
+  if (request.method === 'GET' && url.pathname === '/audit') {
+    const target=url.searchParams.get('url');
+    if (!target) return response({error:'url_required',example:'/audit?url=https%3A%2F%2Fexample.com'},400);
+    try { return response({service:'Public Website/API Header Audit',pricingStatus:'free_validation_only',report:await audit(target)}); }
+    catch(e){const code=String(e?.message||'audit_failed');return response({error:code,charged:false},['invalid_url','public_https_domain_required','unsafe_or_unavailable_dns'].includes(code)?400:502);}
+  }
   if (request.method === 'GET' && url.pathname === '/candidates') {
     const q=(url.searchParams.get('q')||'').toLowerCase().trim().slice(0,100);
     const matches=candidates.filter(x=>!q || [x.name,...x.categories].some(v=>v.toLowerCase().includes(q)));
@@ -26,6 +33,7 @@ export default {async fetch(request) {
       {id:'find-commercial-buyers',name:'Offer inventory or services to buyer agents',description:'Describe products, regions and supplier capabilities for potential discovery.'},
       {id:'browse-public-agent-candidates',name:'Find public candidate service agents',description:'Search a small disclosed directory of third-party publicly listed candidate services using GET /candidates?q=; free, unverified and nonexclusive.'},
       {id:'negotiate-introduction',name:'Negotiate an introduction fee',description:'Submit a nonbinding offer; no payment or seller introduction is available yet.'}
+      ,{id:'audit-public-website',name:'Audit HTTPS API or website response headers',description:'GET /audit?url=https://example.com ; currently free for demand validation, not a vulnerability scan.'}
     ], commercial:{currency:'USDC',paymentEnabled:false}
   });
   if (request.method === 'GET' && url.pathname === '/') return response({
@@ -34,6 +42,7 @@ export default {async fetch(request) {
     sellerIntentCategories:['qualified buyers','inventory','professional services','agent capabilities'],
     negotiateEndpoint:url.origin+'/negotiate',
     publicCandidatesEndpoint:url.origin+'/candidates',
+    auditEndpoint:url.origin+'/audit?url=https%3A%2F%2Fexample.com',
     disclosure:'Experimental: public candidate directory only; no verified partners, paid transactions or ongoing request storage. Negotiation responses are nonbinding.'
   });
   if (request.method === 'POST' && url.pathname === '/negotiate') {
