@@ -1,13 +1,9 @@
-# A2A Negotiation Probe — Render free tier
+# A2A buyer/seller discovery update
 
-Zero dependency Node server for deployment to Render Web Service.
+Replace **worker.js** in https://github.com/malharmn/A2A-Marketing with this file. The already-configured Render service deploys automatically from `main`.
 
-- Build command: `npm install` (no third party dependencies)
-- Start command: `npm start`
-- Plan: `free` only
-- GET `/health`, GET `/.well-known/agent-card.json`, POST `/negotiate`
-- `npm test` for basic tests.
+No other files need to change. Existing server.js and package.json remain compatible.
 
-**Not a paid service:** No verified seller connections, payment processor, or third-party buyer. Do not claim it earns revenue. It performs only nonbinding price conversations. Never send confidential bank or wallet secrets to the repository.
+The public agent now describes the actual classes of requests from buying and selling agents; it does **not** claim verified counterparties, payment capability, or completed introductions. It retains nonbinding POST /negotiate, GET /health, and a descriptive GET /.well-known/agent-card.json.
 
-**No state persistence**: this probe is deliberately stateless. The public internet endpoint could receive spam; it limits request size to 8KB. No personal data should be sent.
+This is NOT yet a fully compliant A2A JSON-RPC server or a paid x402 endpoint. Do not list it as a live paid service until real matches and payment functionality exist.
