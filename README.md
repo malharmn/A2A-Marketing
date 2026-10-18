@@ -1,9 +1,5 @@
-# A2A buyer/seller discovery update
+# Public candidate connections update
 
-Replace **worker.js** in https://github.com/malharmn/A2A-Marketing with this file. The already-configured Render service deploys automatically from `main`.
+Replace only `worker.js` in `malharmn/A2A-Marketing` with this version and commit. Render is configured to deploy the main branch. This adds `GET /candidates?q=api`, a zero-cost list of three independently listed candidate service agents based on public A2A Registry pages. It does not claim partnerships, verify endpoint availability, accept payments, or sell public URLs. Existing `/negotiate` remains nonbinding.
 
-No other files need to change. Existing server.js and package.json remain compatible.
-
-The public agent now describes the actual classes of requests from buying and selling agents; it does **not** claim verified counterparties, payment capability, or completed introductions. It retains nonbinding POST /negotiate, GET /health, and a descriptive GET /.well-known/agent-card.json.
-
-This is NOT yet a fully compliant A2A JSON-RPC server or a paid x402 endpoint. Do not list it as a live paid service until real matches and payment functionality exist.
+Do not charge for these public listings; they are a preliminary supply discovery step, not a commercial introduction.

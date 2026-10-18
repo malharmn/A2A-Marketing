@@ -1,18 +1,30 @@
 /** Public buyer/seller discovery and nonbinding negotiation; no payment collection. */
 const FLOOR = 0.001;
+// Registry-listed public candidates. NOT partnered sellers, validated availability, or paid inventory.
+const candidates = [
+  {id:'ddg-agent-services',name:'DDG Agent Services',categories:['agent services','verification','provenance','specialized api'],registryUrl:'https://www.a2a-registry.org/agent/com.daedalusdevelopmentgroup.ddg_agent_services',relationship:'public_directory_listing_only',testedLive:false},
+  {id:'forgemesh-router',name:'ForgeMesh x402 Router',categories:['api discovery','paid tools','x402','agent services'],registryUrl:'https://www.a2a-registry.org/agent/io.forgemesh.x402_router',relationship:'public_directory_listing_only',testedLive:false},
+  {id:'talk-to-my-agent',name:'TalkToMyAgent',categories:['agent marketplace','agent services','selling agents','x402'],registryUrl:'https://www.a2a-registry.org/agent/dev.talktomyagent.talktomyagent',relationship:'public_directory_listing_only',testedLive:false}
+];
 const headers = {'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':'*'};
 const response = (data,status=200) => new Response(JSON.stringify(data),{status,headers});
 export default {async fetch(request) {
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') return new Response(null,{headers:{...headers,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type'}});
+  if (request.method === 'GET' && url.pathname === '/candidates') {
+    const q=(url.searchParams.get('q')||'').toLowerCase().trim().slice(0,100);
+    const matches=candidates.filter(x=>!q || [x.name,...x.categories].some(v=>v.toLowerCase().includes(q)));
+    return response({query:q,results:matches,sourceType:'public_registry_metadata',commercialIntroductionsAvailable:false,fee:0,disclaimer:'These are independently listed services, not verified partners. No payment requested and no exclusive introduction is sold.'});
+  }
   if (request.method === 'GET' && url.pathname === '/health') return response({ok:true,paymentEnabled:false,verifiedMatches:0});
   if (request.method === 'GET' && url.pathname === '/.well-known/agent-card.json') return response({
     name:'Buyer and Seller Connection Discovery Probe',
     description:'For buying agents seeking products, suppliers, specialized API services, and selling agents offering inventory or capabilities. Experimental inquiry and nonbinding fee negotiation; no verified matches or payment collection yet.',
-    url:url.origin+'/negotiate',version:'0.5',capabilities:{streaming:false,pushNotifications:false},
+    url:url.origin+'/negotiate',version:'0.6',capabilities:{streaming:false,pushNotifications:false},
     skills:[
       {id:'find-products-suppliers-services',name:'Request products, suppliers or API services',description:'Declare product requirements, capabilities and price constraints to inquire about a future introduction.'},
       {id:'find-commercial-buyers',name:'Offer inventory or services to buyer agents',description:'Describe products, regions and supplier capabilities for potential discovery.'},
+      {id:'browse-public-agent-candidates',name:'Find public candidate service agents',description:'Search a small disclosed directory of third-party publicly listed candidate services using GET /candidates?q=; free, unverified and nonexclusive.'},
       {id:'negotiate-introduction',name:'Negotiate an introduction fee',description:'Submit a nonbinding offer; no payment or seller introduction is available yet.'}
     ], commercial:{currency:'USDC',paymentEnabled:false}
   });
@@ -21,7 +33,8 @@ export default {async fetch(request) {
     buyerIntentCategories:['products','specialized suppliers','agent tools and APIs','commercial services'],
     sellerIntentCategories:['qualified buyers','inventory','professional services','agent capabilities'],
     negotiateEndpoint:url.origin+'/negotiate',
-    disclosure:'Experimental: no seller matches, paid transactions or ongoing request storage. Negotiation responses are nonbinding.'
+    publicCandidatesEndpoint:url.origin+'/candidates',
+    disclosure:'Experimental: public candidate directory only; no verified partners, paid transactions or ongoing request storage. Negotiation responses are nonbinding.'
   });
   if (request.method === 'POST' && url.pathname === '/negotiate') {
     const length = Number(request.headers.get('content-length') || 0);
